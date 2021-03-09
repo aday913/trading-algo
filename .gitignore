@@ -1,4 +1,5 @@
-strategy_test.ipynb
+strategies.py
+.vscode
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
