@@ -1,26 +1,8 @@
+from email.mime.text import MIMEText
 from dotenv import load_dotenv
 import smtplib, ssl
 import email
 import os
-
-SENDER = os.getenv('SENDER')
-RECEIVER = os.getenv('RECEIVER')
-PASSWORD = os.getenv('PASSWORD')
-
-port = 465
-smtp_server = 'smtp.gmail.com'
-
-message = '''\
-Subject: Test email!
-
-Hey there! This is a test email from adaypython!
-'''
-
-context = ssl.create_default_context()
-with smtplib.SMTP_SSL(smtp_server, port, 
-                    context=context) as server:
-    server.login(SENDER, PASSWORD)
-    server.sendmail(SENDER, RECEIVER, message)
 
 class Emailer(object):
     '''
@@ -34,15 +16,30 @@ class Emailer(object):
 
         load_dotenv()
 
-        self.SENDER = os.getenv('SENDER')
-        self.RECEIVER = os.getenv('RECEIVER')
-        self.PASSWORD = os.getenv('PASSWORD')
+        self.SENDER = os.getenv('SENDEREMAIL')
+        self.RECEIVER = os.getenv('RECEIVEREMAIL')
+        self.PASSWORD = os.getenv('EMAILPASSWORD')
 
-    def sendMessage(self, message):
+    def sendMessage(self, message, subject='Weekly Update'):
         '''
         '''
         context = ssl.create_default_context()
+
+        msg = MIMEText(message)
+        msg['Subject'] = subject
+        msg['From'] = self.SENDER
+        msg['To'] = self.RECEIVER
+
         with smtplib.SMTP_SSL(self.server, self.port, 
                             context=context) as server:
             server.login(self.SENDER, self.PASSWORD)
-            server.sendmail(self.SENDER, self.RECEIVER, message)
+            server.sendmail(self.SENDER, self.RECEIVER, msg.as_string())
+        print('Successfully sent the email!')
+
+if __name__ == '__main__':
+    emailBot = Emailer()
+    emailBot.sendMessage(
+        '''\
+            Hey there! This is a test email from adaypython!
+        '''
+        )
