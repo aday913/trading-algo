@@ -1,6 +1,9 @@
 strategies.py
 .vscode
 
+# Make sure that our models don't get saved to github
+*.sav
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
