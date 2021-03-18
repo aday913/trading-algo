@@ -15,7 +15,14 @@ class Portfolio(object):
     Portfolio object that will keep track of the various assets that
     we buy/sell, as well as track the equity available
     '''
-    def __init__(self, api):
+    def __init__(self, api, debug=False):
+        if debug:
+            logging.basicConfig(level=logging.DEBUG,
+                                format='%(name)s: %(message)s')
+        else:
+            logging.basicConfig(level=logging.INFO,
+                                format='%(name)s: %(message)s')
+        
         if api == 'own':
             load_dotenv()
 
@@ -48,6 +55,7 @@ class Backtest(object):
             self.api = api
 
         self.testableSymbols = self.getHistoricalData()
+        self.portfolio = Portfolio()
 
     def getHistoricalData(self):
         initial = self.api.list_assets()
@@ -61,16 +69,10 @@ class Backtest(object):
                 for i in temp[asset.symbol]:
                     prices.append(temp[asset.symbol].)
                 if len(temp[asset.symbol]) == 1000:
-                    backtestable[asset.symbol]
+                    backtestable[asset.symbol] = prices
             i += 1
         return backtestable
         
 
 if __name__ == '__main__':
-    load_dotenv()
-    APCA_API_SECRET_KEY = os.getenv('APCA_API_SECRET_KEY')
-    APCA_API_KEY_ID = os.getenv('APCA_API_KEY_ID')
-    APCA_API_BASE_URL = os.getenv('APCA_API_BASE_URL')
-    api = tradeapi.REST()
-
-    test = Backtest(api, strategy=None, debug=True)
+    test = Backtest(api='own', strategy=None, debug=True)
