@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import smtplib, ssl
 import imapclient
 import datetime
+import logging
 import email
 import os
 
@@ -12,7 +13,14 @@ class Emailer(object):
     portfolio updates as they become available
     '''
 
-    def __init__(self):
+    def __init__(self, debug=False):
+        if debug:
+            logging.basicConfig(level=logging.DEBUG,
+                                format='%(name)s: %(message)s')
+        else:
+            logging.basicConfig(level=logging.INFO,
+                                format='%(name)s: %(message)s')
+        
         self.port = 465
         self.server = 'smtp.gmail.com'
 
@@ -38,7 +46,7 @@ class Emailer(object):
                             context=context) as server:
             server.login(self.SENDER, self.PASSWORD)
             server.sendmail(self.SENDER, self.RECEIVER, msg.as_string())
-        print('Successfully sent the email!')
+        logging.debug('Successfully sent the email!')
 
     def readEmail(self):
         '''
