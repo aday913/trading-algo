@@ -92,7 +92,10 @@ class Bot(object):
 
     def runTest(self):
         '''
-        For testing purposes, the function will first fill the interested
+        For testing purposes, the function will first find out which assets 
+        we are interested in (see self.getTradableStocks()), then for every
+        stock that comes back we use the bollingerMA strategy to determine
+        whether or not we buy or sell the stock that day
         '''
         if self.api.get_clock().is_open and not self.tradedToday:
             self.getTradableStocks()
@@ -113,18 +116,18 @@ class Bot(object):
             logging.debug('# of stocks to sell: {}'.format(
                                                 len(self.testTrades['Sell'])
             ))
-            # message = '''Here is what would have been traded today:
+            message = '''Here is what would have been traded today:
             
-            # The following would have been bought:\n
-            # '''
-            # for i in self.testTrades['Buy']:
-            #     message = message + '  ' + str(i) + '\n'
-            # message = message + '''
-            # The following would have been sold:\n
-            # '''
-            # for i in self.testTrades['Sell']:
-            #     message = message + '  ' + str(i) + '\n'
-            # self.emailer.sendMessage(message)
+            The following would have been bought:\n
+            '''
+            for i in self.testTrades['Buy']:
+                message = message + '  ' + str(i) + '\n'
+            message = message + '''
+            The following would have been sold:\n
+            '''
+            for i in self.testTrades['Sell']:
+                message = message + '  ' + str(i) + '\n'
+            self.emailer.sendMessage(message, subject='Test Trades!')
 
 
 if __name__ == '__main__':
