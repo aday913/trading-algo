@@ -1,6 +1,7 @@
 # Self-made modules
 from emailHelper import Emailer
 from mlanalysis import MLAnalysis
+from strategies import bollingerMA_Backtest
 
 from alpaca_trade_api.rest import TimeFrame
 from dotenv import load_dotenv
@@ -9,23 +10,6 @@ import pandas as pd
 import datetime
 import logging
 import os
-
-class Asset(object):
-    def __init__(self, api, symbol, buySell):
-        self.symbol = symbol
-        self.buySell = buySell
-
-        if api == 'own':
-            load_dotenv()
-
-            APCA_API_SECRET_KEY = os.getenv('APCA_API_SECRET_KEY')
-            APCA_API_KEY_ID = os.getenv('APCA_API_KEY_ID')
-            APCA_API_BASE_URL = os.getenv('APCA_API_BASE_URL')
-
-            self.api = tradeapi.REST()
-        else:
-            self.api = api
-
 
 class Bot(object):
     '''
@@ -57,39 +41,99 @@ class Bot(object):
 
         self.api = tradeapi.REST()
 
-    def getHistoricalData(self, symbol, timeframe, startDate, endDate):
-        pass
+        self.interestedStocks = {}
+
+        self.testTrades = {'Buy' : [],
+                            'Sell' : [],
+                            'Nothing' : []}
+
+        self.emailer = Emailer()
+
+        self.tradedToday = False
+
+        self.maxHold = 150
+
+    def getTradableStocks(self):
+        '''
+        Gets all of the available stocks to trade and then filters them
+        to assets that are active, fractionable, and less than $50 a share
+
+        These assets are then saved in the object's "interestedStocks" dict
+        '''
+        initial = self.api.list_assets()
+        cycle = 0
+        for asset in initial:
+            logging.debug('Grabbing {} of {} assets...'.format(cycle, 
+                                                        len(initial)))
+            if asset.status == 'active' and asset.fractionable:
+                temp = self.api.get_barset(asset.symbol, '1D', limit=300)
+                if temp[asset.symbol][-1].c < 50:
+                    prices = []
+                    if len(temp[asset.symbol]) == 300:
+                        for i in temp[asset.symbol]:
+                            prices.append(i.c)
+                            self.interestedStocks[asset.symbol] = prices
+                    else:
+                        self.interestedStocks[asset.symbol] = None
+            cycle += 1
 
     def getCurrentPrice(self, symbol):
-        bars = self.api.get_barset(symbol, '1D', limit=1)
+        '''
+        Grabs the latest closing price of a asset given its symbol
+
+        Returns both the closing price and the overall price data at that
+        timepoint
+        '''
+        bars = self.api.get_barset(symbol, '1Min', limit=1)
         logging.debug('Last closing price for {} stock: ${}'.format(symbol, 
                                                     bars[symbol][-1].c))
-        return bars
+        closing = bars[symbol][-1].c
+        return closing, bars
+
+    def runTest(self):
+        '''
+        For testing purposes, the function will first fill the interested
+        '''
+        if self.api.get_clock().is_open and not self.tradedToday:
+            self.getTradableStocks()
+            for stock in self.interestedStocks:
+                if self.interestedStocks[stock] != None:
+                    buySell = bollingerMA_Backtest(stock, 
+                                            self.interestedStocks[stock])
+                    if buySell == 1:
+                        self.testTrades['Buy'].append(stock)
+                    elif buySell == -1:
+                        self.testTrades['Sell'].append(stock)
+                    else:
+                        self.testTrades['Nothing'].append(stock)
+            self.tradedToday = True
+            logging.debug('# of stocks to buy: {}'.format(
+                                                len(self.testTrades['Buy'])
+            ))
+            logging.debug('# of stocks to sell: {}'.format(
+                                                len(self.testTrades['Sell'])
+            ))
+            # message = '''Here is what would have been traded today:
+            
+            # The following would have been bought:\n
+            # '''
+            # for i in self.testTrades['Buy']:
+            #     message = message + '  ' + str(i) + '\n'
+            # message = message + '''
+            # The following would have been sold:\n
+            # '''
+            # for i in self.testTrades['Sell']:
+            #     message = message + '  ' + str(i) + '\n'
+            # self.emailer.sendMessage(message)
+
 
 if __name__ == '__main__':
     bot = Bot(debug=True)
-    print(bot.getCurrentPrice('SNAP')['SNAP'][-1].c)
-
-    # print(api.get_barset('AAPL', 'day', limit=5))
-    # assetList = bot.api.list_assets()
-    # print(assetList[-1])
-    # active = 0
-    # for asset in assetList:
-    #     if asset.status == 'active' and asset.fractionable:
-    #         active += 1
-    # print(active)
+    bot.getCurrentPrice('SNAP')
+    bot.runTest()
 
     # # Check if the market is open now.
     # clock = api.get_clock()
     # print('The market is {}'.format('open.' if clock.is_open else 'closed.'))
-
-    # # Check when the market was open on Dec. 1, 2018
-    # date = '2021-3-11'
-    # calendar = api.get_calendar(start=date, end=date)[0]
-    # print('The market opened at {} and closed at {} on {}.'.format(
-    #     calendar.open,
-    #     calendar.close,
-    #     date
-    # ))
 
     # print(api.get_bars("AAPL", TimeFrame.Day, "2021-01-01", "2021-01-03", limit=10, adjustment='raw').df)
