@@ -81,7 +81,7 @@ if __name__ == '__main__':
     emailBot = Emailer()
     emailBot.sendMessage(
         '''\
-            Hey there! This is a test email from adaypython!
+            Hey there! This is a test email!
         '''
         )
     print(emailBot.readEmail())
