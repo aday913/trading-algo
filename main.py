@@ -129,6 +129,13 @@ class Bot(object):
                 message = message + '  ' + str(i) + '\n'
             self.emailer.sendMessage(message, subject='Test Trades!')
 
+    def order(self, symbol, shares, buySell):
+        self.api.submit_order(symbol=symbol,
+                            side=buySell,
+                            type='market',
+                            qty=shares,
+                            time_in_force='day'
+                            )
 
 if __name__ == '__main__':
     bot = Bot(debug=True)
