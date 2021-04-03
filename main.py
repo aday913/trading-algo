@@ -25,7 +25,7 @@ class Bot(object):
     in the github repo due to not wanting to publicly release it.
     '''
 
-    def __init__(self, debug=False):
+    def __init__(self, debug=False, strategy):
         if debug:
             logging.basicConfig(level=logging.DEBUG,
                                 format='%(name)s: %(message)s')
@@ -43,6 +43,8 @@ class Bot(object):
 
         self.interestedStocks = {}
 
+        self.strategy = strategy
+
         self.testTrades = {'Buy' : [],
                             'Sell' : [],
                             'Nothing' : []}
@@ -52,6 +54,9 @@ class Bot(object):
         self.tradedToday = False
 
         self.maxHold = 150
+
+    def getCurrentAccount(self):
+        self.api.get_account()
 
     def getTradableStocks(self):
         '''
@@ -94,15 +99,15 @@ class Bot(object):
         '''
         For testing purposes, the function will first find out which assets 
         we are interested in (see self.getTradableStocks()), then for every
-        stock that comes back we use the bollingerMA strategy to determine
+        stock that comes back we use the given strategy to determine
         whether or not we buy or sell the stock that day
         '''
-        if self.api.get_clock().is_open and not self.tradedToday:
+        # if self.api.get_clock().is_open and not self.tradedToday:
+        if not self.tradedToday:
             self.getTradableStocks()
             for stock in self.interestedStocks:
                 if self.interestedStocks[stock] != None:
-                    buySell = bollingerMA_Backtest(stock, 
-                                            self.interestedStocks[stock])
+                    buySell = self.strategy(stock, self.interestedStocks[stock])
                     if buySell == 1:
                         self.testTrades['Buy'].append(stock)
                     elif buySell == -1:
@@ -128,17 +133,41 @@ class Bot(object):
             for i in self.testTrades['Sell']:
                 message = message + '  ' + str(i) + '\n'
             self.emailer.sendMessage(message, subject='Test Trades!')
+    
+    def rebalance(self):
+        '''
+        Method meant to rebalance our holds on a daily basis to ensure optimal
+        algorithmic trading
+        '''
+        pass
+    
+    def run(self):
+        '''
+
+        '''
+        pass
 
     def order(self, symbol, shares, buySell):
+        '''
+        Method used to make the ordering process smoother
+        '''
         self.api.submit_order(symbol=symbol,
                             side=buySell,
                             type='market',
                             qty=shares,
                             time_in_force='day'
                             )
+    
+    def dailyLoop(self):
+        '''
+
+        '''
+        if self.api.get_clock().is_open and not self.tradedToday:
+            pass
+
 
 if __name__ == '__main__':
-    bot = Bot(debug=True)
+    bot = Bot(debug=True, strategy=bollingerMA_Backtest)
     bot.getCurrentPrice('SNAP')
     bot.runTest()
 
