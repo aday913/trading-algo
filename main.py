@@ -25,7 +25,7 @@ class Bot(object):
     in the github repo due to not wanting to publicly release it.
     '''
 
-    def __init__(self, debug=False, strategy):
+    def __init__(self, strategy, debug=False):
         if debug:
             logging.basicConfig(level=logging.DEBUG,
                                 format='%(name)s: %(message)s')
