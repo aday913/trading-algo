@@ -67,7 +67,7 @@ class Backtest(object):
                 temp = self.api.get_barset(asset.symbol, '1D', limit=1000)
                 prices = []
                 for i in temp[asset.symbol]:
-                    prices.append(temp[asset.symbol].)
+                    prices.append(temp[asset.symbol])
                 if len(temp[asset.symbol]) == 1000:
                     backtestable[asset.symbol] = prices
             i += 1
