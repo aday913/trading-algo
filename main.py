@@ -55,8 +55,14 @@ class Bot(object):
 
         self.maxHold = 150
 
+        self.account = None
+
+    def getAccountStatus(self):
+        if self.account != None:
+            return self.account.status()
+
     def getCurrentAccount(self):
-        self.api.get_account()
+        self.account = self.api.get_account()
 
     def getTradableStocks(self):
         '''
@@ -70,10 +76,16 @@ class Bot(object):
         for asset in initial:
             logging.debug('Grabbing {} of {} assets...'.format(cycle, 
                                                         len(initial)))
+
+            # Check if the asset is active and fractionable
             if asset.status == 'active' and asset.fractionable:
+                # try to grab 300 trading days of data
                 temp = self.api.get_barset(asset.symbol, '1D', limit=300)
+
+                # Check if the newest price is less than $50
                 if temp[asset.symbol][-1].c < 50:
                     prices = []
+                    # We only want the asset if it has a full 300 days of data
                     if len(temp[asset.symbol]) == 300:
                         for i in temp[asset.symbol]:
                             prices.append(i.c)
