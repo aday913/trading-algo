@@ -1,4 +1,5 @@
 .vscode
+testbed_script.py
 testalgo.py
 
 # Make sure that our models don't get saved to github
