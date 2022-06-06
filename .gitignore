@@ -1,5 +1,5 @@
-strategies.py
 .vscode
+testalgo.py
 
 # Make sure that our models don't get saved to github
 *.sav
