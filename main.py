@@ -1,7 +1,7 @@
 # Self-made modules
 from emailHelper import Emailer
 from mlanalysis import MLAnalysis
-from strategies import bollingerMA_Backtest
+# from strategies import bollingerMA_Backtest
 
 from alpaca_trade_api.rest import TimeFrame
 from dotenv import load_dotenv
@@ -167,9 +167,9 @@ class Bot(object):
 
 
 if __name__ == '__main__':
-    bot = Bot(debug=True, strategy=bollingerMA_Backtest)
+    bot = Bot(debug=True, strategy=None)
     bot.getCurrentPrice('SNAP')
-    bot.runTest()
+    # bot.runTest()
 
     # # Check if the market is open now.
     # clock = api.get_clock()
