@@ -46,7 +46,7 @@ class Emailer(object):
                             context=context) as server:
             server.login(self.SENDER, self.PASSWORD)
             server.sendmail(self.SENDER, self.RECEIVER, msg.as_string())
-        logging.debug('Successfully sent the email!')
+        logging.info('Successfully sent the email!')
 
     def readEmail(self):
         '''
