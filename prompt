@@ -1,0 +1,10 @@
+We are making a python inter-day trading bot using python and the alpaca api. 
+Given an input yaml configuration file containing the alpaca api key, generate a codebase allowing for
+connecting to the alpaca api, checking if trading is available today, fetching the current portfolio,
+and executing a simple bollinger moving average strategy on a handful of stocks (google, tesla, 
+microsoft, and general electric for now). This strategy should determine whether a buy, sell, or stay
+order should be submitted, with a proportional amount of the portfolio's cash buying power being used.
+The bollinger strategy should be its own class that inherits from a general Strategy class that can be
+expanded upon in the future to include other common trading strategies. Finally, I want a backtesting 
+class that takes the api client, a given Strategy class, and a start/stop timepoint and tests how the
+strategy would have performed at that time.
