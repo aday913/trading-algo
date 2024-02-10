@@ -1,5 +1,4 @@
 # Self-made modules
-from emailHelper import Emailer
 from mlanalysis import MLAnalysis
 # from strategies import bollingerMA_Backtest
 
@@ -48,8 +47,6 @@ class Bot(object):
         self.testTrades = {'Buy' : [],
                             'Sell' : [],
                             'Nothing' : []}
-
-        self.emailer = Emailer()
 
         self.tradedToday = False
 
@@ -144,7 +141,6 @@ class Bot(object):
             '''
             for i in self.testTrades['Sell']:
                 message = message + '  ' + str(i) + '\n'
-            self.emailer.sendMessage(message, subject='Test Trades!')
     
     def rebalance(self):
         '''
