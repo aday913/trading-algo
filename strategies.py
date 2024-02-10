@@ -12,30 +12,31 @@ import os
 
 load_dotenv()
 
-APCA_API_SECRET_KEY = os.getenv('APCA_API_SECRET_KEY')
-APCA_API_KEY_ID = os.getenv('APCA_API_KEY_ID')
-APCA_API_BASE_URL = os.getenv('APCA_API_BASE_URL')
+APCA_API_SECRET_KEY = os.getenv("APCA_API_SECRET_KEY")
+APCA_API_KEY_ID = os.getenv("APCA_API_KEY_ID")
+APCA_API_BASE_URL = os.getenv("APCA_API_BASE_URL")
 
 api = tradeapi.REST()
+
 
 def bollingerMA_API(apiObject, symbol):
     # Find short moving average:
     prices = []
-    temp = api.get_barset(symbol, '1D', limit=15)
+    temp = api.get_barset(symbol, "1D", limit=15)
     for i in temp[symbol]:
         prices.append(i.c)
     short = np.mean(prices)
 
     # Find long moving average:
     prices = []
-    temp = api.get_barset(symbol, '1D', limit=60)
+    temp = api.get_barset(symbol, "1D", limit=60)
     for i in temp[symbol]:
         prices.append(i.c)
     long = np.mean(prices)
 
     # Find bollinger bands:
     prices = []
-    temp = api.get_barset(symbol, '1D', limit=20)
+    temp = api.get_barset(symbol, "1D", limit=20)
     for i in temp[symbol]:
         prices.append(i.c)
     avg = np.mean(prices)
@@ -46,7 +47,7 @@ def bollingerMA_API(apiObject, symbol):
     lowSafe = avg - (1 * std)
 
     # Get the current price:
-    current = api.get_barset(symbol, '1D', limit=1)
+    current = api.get_barset(symbol, "1D", limit=1)
     price = current[symbol][0].c
 
     # Now we check to see if we should buy or sell:
@@ -58,17 +59,18 @@ def bollingerMA_API(apiObject, symbol):
         # buy
         # print('Below bollinger')
         return 1
-    elif price > lowSafe and price < upSafe and short-long < 0:
+    elif price > lowSafe and price < upSafe and short - long < 0:
         # sell
         # print('MA reasons')
         return -1
-    elif price > lowSafe and price < upSafe and short-long > 0:
+    elif price > lowSafe and price < upSafe and short - long > 0:
         # buy
         # print('MA reasons')
         return 1
     else:
         # do nothing
         return 0
+
 
 def bollingerMA_Backtest(symbol, data):
     # Find short moving average:
@@ -106,11 +108,11 @@ def bollingerMA_Backtest(symbol, data):
         # buy
         # print('Below bollinger')
         return 1
-    elif price > lowSafe and price < upSafe and short-long < 0:
+    elif price > lowSafe and price < upSafe and short - long < 0:
         # sell
         # print('MA reasons')
         return -1
-    elif price > lowSafe and price < upSafe and short-long > 0:
+    elif price > lowSafe and price < upSafe and short - long > 0:
         # buy
         # print('MA reasons')
         return 1
@@ -118,8 +120,8 @@ def bollingerMA_Backtest(symbol, data):
         # do nothing
         return 0
 
-if __name__ == '__main__':
-    print(bollingerMA_API(api, 'SNAP'))
-    temp = api.get_barset('SNAP', '1D', limit=1000)
-    print(len(temp['SNAP']))
-    
+
+if __name__ == "__main__":
+    print(bollingerMA_API(api, "SNAP"))
+    temp = api.get_barset("SNAP", "1D", limit=1000)
+    print(len(temp["SNAP"]))
